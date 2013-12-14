@@ -1,8 +1,5 @@
 package concurrency.stm;
 
-/**
- * @author mishadoff
- */
 public final class STM {
     private STM() {}
 
@@ -11,10 +8,9 @@ public final class STM {
     public static void transaction(TransactionBlock block) {
         boolean committed = false;
         while (!committed) {
-            Transaction tx = new Transaction();
-            block.setTx(tx);
+            block.tx = new Transaction();
             block.run();
-            committed = tx.commit();
+            committed = block.tx.commit();
         }
     }
 
