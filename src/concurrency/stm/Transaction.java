@@ -1,15 +1,14 @@
 package concurrency.stm;
 
+import concurrency.test.Account;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * @author mishadoff
- */
-public final class Transaction extends Context{
+public final class Transaction extends Context implements Runnable{
     private HashMap<Ref, Object> inTxMap = new HashMap<>();
     private HashSet<Ref> toUpdate = new HashSet<>();
     private HashMap<Ref, Long> version = new HashMap<>();
@@ -17,8 +16,14 @@ public final class Transaction extends Context{
     private long revision;
     private static AtomicLong transactionNum = new AtomicLong(0);
 
-    Transaction() {
+    private Account a, b;
+    private int amount;
+
+    Transaction(final Account a, final Account b, final int amount) {
         revision = transactionNum.incrementAndGet();
+        this.a = a;
+        this.b = b;
+        this.amount = amount;
     }
 
     @Override
@@ -60,5 +65,14 @@ public final class Transaction extends Context{
             }
             return isValid;
         }
+    }
+
+    @Override
+    public void run()
+    {
+        long old1 = a.getRef().getValue(this);
+        a.getRef().setValue(old1 - amount, this);
+        long old2 = b.getRef().getValue(this);
+        b.getRef().setValue(old2 + amount, this);
     }
 }

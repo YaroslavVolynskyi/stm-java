@@ -1,16 +1,18 @@
 package concurrency.stm;
 
+import concurrency.test.Account;
+
 public final class STM {
     private STM() {}
 
     public static final Object commitLock = new Object();
 
-    public static void transaction(TransactionBlock block) {
+    public static void transaction(final Account a, final Account b, final int amount) {
         boolean committed = false;
         while (!committed) {
-            block.tx = new Transaction();
-            block.run();
-            committed = block.tx.commit();
+            Transaction transaction = new Transaction(a, b, amount);
+            transaction.run();
+            committed = transaction.commit();
         }
     }
 
